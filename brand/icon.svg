@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Discord Voice Lite — app icon</title>
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6A76F5"/><stop offset="1" stop-color="#4752C4"/></linearGradient></defs>
+  <rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/>
+  <g fill="#FFFFFF"><rect x="272" y="352" width="64" height="124" rx="32"/><rect x="376" y="352" width="64" height="264" rx="32"/><rect x="584" y="352" width="64" height="264" rx="32"/><rect x="688" y="352" width="64" height="124" rx="32"/></g><rect x="480" y="352" width="64" height="408" rx="32" fill="#57F287"/><rect x="232" y="276" width="560" height="48" rx="24" fill="#FFFFFF"/>
+</svg>

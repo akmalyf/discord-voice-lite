@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discord Voice Lite — logo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blurple: #5865F2;
+    --green: #57F287;
+    --ink: #23272A;
+    --frost: #F2F3F5;
+    --steel: #E3E5E8;
+    --slate: #4E5058;
+    --greyple: #99AAB5;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--frost); color: var(--ink); font-family: Archivo, system-ui, sans-serif; padding: 56px 24px 80px; }
+  .wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 64px; }
+  .label { font: 500 11px/1 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--slate); margin-bottom: 16px; }
+
+  .hero { display: grid; grid-template-columns: 300px 1fr; gap: 48px; align-items: center; }
+  .hero .appicon { width: 300px; height: 300px; filter: drop-shadow(0 18px 30px rgba(88,101,242,.35)); }
+
+  .lockup { display: flex; align-items: center; gap: 22px; }
+  .lockup .m { width: 76px; color: var(--blurple); --accent: var(--ink); }
+  .name { line-height: .86; }
+  .name .top { font-weight: 450; font-stretch: 100%; font-size: 26px; letter-spacing: .01em; color: var(--slate); display: block; margin-bottom: 6px; }
+  .name .main { font-weight: 780; font-stretch: 72%; font-size: 72px; letter-spacing: -.01em; text-transform: uppercase; display: block; }
+  .name .main i { font-style: normal; color: var(--blurple); }
+
+  .row { display: flex; gap: 40px; align-items: end; flex-wrap: wrap; }
+  .size { display: grid; gap: 10px; justify-items: center; font: 400 11px "JetBrains Mono", monospace; color: var(--slate); }
+
+  .panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .panel { border-radius: 20px; padding: 40px; display: flex; align-items: center; justify-content: center; min-height: 200px; }
+  .panel.light { background: #fff; color: var(--ink); }
+  .panel.dark { background: var(--ink); color: #fff; }
+  .panel.dark .m, .panel.brand .m { color: #fff; --accent: var(--green); }
+  .panel.dark .name .top { color: var(--greyple); }
+  .panel.brand { background: var(--blurple); color: #fff; }
+  .panel.brand .name .top { color: rgba(255,255,255,.8); }
+  .panel.brand .name .main i { color: var(--green); }
+
+  .menubar { background: rgba(236,238,242,.92); border-radius: 12px; height: 30px; display: flex; align-items: center; justify-content: flex-end; gap: 18px; padding: 0 16px; font: 500 13px system-ui; color: #222; }
+  .menubar svg { height: 15px; width: 18px; color: #222; }
+  .menubar.dk { background: #2a2c33; color: #eee; }
+  .menubar.dk svg { color: #eee; }
+
+  .swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  .sw { border-radius: 14px; height: 96px; padding: 12px; display: flex; flex-direction: column; justify-content: end; font: 500 11px/1.5 "JetBrains Mono", monospace; border: 1px solid rgba(26,29,38,.08); }
+
+  @media (max-width: 720px) {
+    .hero, .panels { grid-template-columns: 1fr; }
+    .hero .appicon { width: 200px; }
+    .name .main { font-size: 52px; }
+    .swatches { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="mono" viewBox="216 260 592 516"><rect x="272" y="352" width="64" height="124" rx="32"/><rect x="376" y="352" width="64" height="264" rx="32"/><rect x="584" y="352" width="64" height="264" rx="32"/><rect x="688" y="352" width="64" height="124" rx="32"/><rect x="480" y="352" width="64" height="408" rx="32"/><rect x="232" y="276" width="560" height="48" rx="24"/></symbol>
+  <symbol id="duo" viewBox="216 260 592 516"><g fill="currentColor"><rect x="272" y="352" width="64" height="124" rx="32"/><rect x="376" y="352" width="64" height="264" rx="32"/><rect x="584" y="352" width="64" height="264" rx="32"/><rect x="688" y="352" width="64" height="124" rx="32"/></g><rect x="480" y="352" width="64" height="408" rx="32" fill="var(--accent, #57F287)"/><rect x="232" y="276" width="560" height="48" rx="24" fill="currentColor"/></symbol>
+  <symbol id="icon" viewBox="0 0 1024 1024"><defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6A76F5"/><stop offset="1" stop-color="#4752C4"/></linearGradient></defs><rect x="100" y="100" width="824" height="824" rx="185" fill="url(#bg)"/><g fill="#FFFFFF"><rect x="272" y="352" width="64" height="124" rx="32"/><rect x="376" y="352" width="64" height="264" rx="32"/><rect x="584" y="352" width="64" height="264" rx="32"/><rect x="688" y="352" width="64" height="124" rx="32"/></g><rect x="480" y="352" width="64" height="408" rx="32" fill="#57F287"/><rect x="232" y="276" width="560" height="48" rx="24" fill="#FFFFFF"/></symbol>
+</svg>
+
+<div class="wrap">
+  <section class="hero">
+    <svg class="appicon" role="img" aria-label="App icon Discord Voice Lite"><use href="#icon"/></svg>
+    <div>
+      <p class="label">Logo · arah 1</p>
+      <div class="lockup">
+        <svg class="m" fill="currentColor"><use href="#duo"/></svg>
+        <div class="name"><span class="top">Discord</span><span class="main">Voice <i>Lite</i></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Uji ukuran (app icon)</p>
+    <div class="row">
+      <div class="size"><svg width="16" height="16"><use href="#icon"/></svg>16</div>
+      <div class="size"><svg width="32" height="32"><use href="#icon"/></svg>32</div>
+      <div class="size"><svg width="64" height="64"><use href="#icon"/></svg>64</div>
+      <div class="size"><svg width="128" height="128"><use href="#icon"/></svg>128</div>
+      <div class="size"><svg width="256" height="256"><use href="#icon"/></svg>256</div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Lockup di berbagai latar</p>
+    <div class="panels">
+      <div class="panel light"><div class="lockup"><svg class="m"><use href="#duo"/></svg><div class="name"><span class="top">Discord</span><span class="main">Voice <i>Lite</i></span></div></div></div>
+      <div class="panel dark"><div class="lockup"><svg class="m"><use href="#duo"/></svg><div class="name"><span class="top">Discord</span><span class="main">Voice <i>Lite</i></span></div></div></div>
+      <div class="panel brand"><div class="lockup"><svg class="m"><use href="#duo"/></svg><div class="name"><span class="top">Discord</span><span class="main">Voice <i>Lite</i></span></div></div></div>
+      <div class="panel light" style="background:var(--steel)"><svg fill="currentColor" style="width:120px;color:var(--blurple)"><use href="#mono"/></svg></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Menu bar (template, satu warna)</p>
+    <div style="display:grid;gap:10px;max-width:520px">
+      <div class="menubar"><svg fill="currentColor"><use href="#mono"/></svg><span>Sel 6 Nov</span><span>10.24</span></div>
+      <div class="menubar dk"><svg fill="currentColor"><use href="#mono"/></svg><span>Sel 6 Nov</span><span>10.24</span></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Palet</p>
+    <div class="swatches">
+      <div class="sw" style="background:#5865F2;color:#fff">Blurple<br>#5865F2</div>
+      <div class="sw" style="background:#57F287">Green<br>#57F287</div>
+      <div class="sw" style="background:#23272A;color:#fff">Not Quite Black<br>#23272A</div>
+      <div class="sw" style="background:#99AAB5">Greyple<br>#99AAB5</div>
+      <div class="sw" style="background:#F2F3F5">Light<br>#F2F3F5</div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

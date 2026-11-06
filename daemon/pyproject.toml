@@ -1,0 +1,11 @@
+[project]
+name = "daemon"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "discord-native-voice>=0.1.0",
+    "discord-py-self[voice]",
+]
+
+[tool.uv.sources]
+discord-py-self = { git = "https://github.com/dolfies/discord.py-self" }

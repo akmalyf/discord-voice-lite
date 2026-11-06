@@ -1,0 +1,10 @@
+.DS_Store
+
+# Build output
+menubar/build/
+dist/
+
+# Python
+daemon/.venv/
+__pycache__/
+*.pyc

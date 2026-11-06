@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 410" width="760" height="410" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif">
+  <title>Discord Voice Lite — tampilan menu bar (mockup)</title>
+  <defs>
+    <linearGradient id="desk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7C86F7"/><stop offset=".55" stop-color="#5865F2"/><stop offset="1" stop-color="#2C2F8F"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-10%" width="140%" height="130%"><feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0b0d3a" flood-opacity=".35"/></filter>
+    <clipPath id="frame"><rect width="760" height="410" rx="14"/></clipPath>
+  </defs>
+  <g clip-path="url(#frame)">
+    <rect width="760" height="410" fill="url(#desk)"/>
+    <rect width="760" height="26" fill="#f5f5f7" opacity=".82"/>
+    <text x="18" y="17.5" font-size="13" font-weight="600" fill="#1d1d1f">Finder</text>
+    <text x="74" y="17.5" font-size="13" fill="#1d1d1f">File   Edit   View   Go   Window   Help</text>
+    <rect x="412" y="3" width="30" height="20" rx="5" fill="#000" opacity=".1"/>
+    <g fill="#1d1d1f" transform="translate(418 5) scale(0.03041) translate(-216 -260)"><rect x="272" y="352" width="64" height="124" rx="32"/><rect x="376" y="352" width="64" height="210" rx="32"/><rect x="480" y="352" width="64" height="408" rx="32"/><rect x="584" y="352" width="64" height="150" rx="32"/><rect x="688" y="352" width="64" height="96" rx="32"/><rect x="232" y="276" width="560" height="48" rx="24"/></g>
+    <text x="744" y="17.5" font-size="13" fill="#1d1d1f" text-anchor="end">Kam 6 Nov  10.24</text>
+    <g filter="url(#shadow)">
+      <rect x="404" y="34" width="300" height="335" rx="10" fill="#f6f6f8" fill-opacity=".97" stroke="#000" stroke-opacity=".12"/>
+    </g>
+    <text x="426" y="59.5" font-size="13" font-weight="400" fill="#86868b" text-anchor="start">akmal</text><rect x="414" y="71" width="280" height="1" fill="#000" opacity=".1"/><g transform="translate(425,81) scale(.58)" fill="#86868b"><path d="M3 9h4l5-5v16l-5-5H3z"/><path d="M15 8.5a5 5 0 0 1 0 7M17.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="#86868b" stroke-width="2" stroke-linecap="round"/></g><text x="442" y="92.5" font-size="13" font-weight="400" fill="#86868b" text-anchor="start">Lounge — Studio Kecil</text><circle cx="431" cy="110" r="4.5" fill="#57F287" stroke="#2fbf5f" stroke-width="1.4"/><text x="442" y="114.5" font-size="13" font-weight="400" fill="#1d1d1f" text-anchor="start">raka</text><circle cx="431" cy="132" r="4.5" fill="#57F287" stroke="#2fbf5f" stroke-width="1.4"/><text x="442" y="136.5" font-size="13" font-weight="400" fill="#1d1d1f" text-anchor="start">nadia</text><circle cx="431" cy="154" r="4.5" fill="none" stroke="#b0b0b5" stroke-width="1.4"/><text x="442" y="158.5" font-size="13" font-weight="400" fill="#1d1d1f" text-anchor="start">akmal (kamu)</text><g stroke="#ED4245" stroke-width="1.5" stroke-linecap="round"><circle cx="431" cy="176" r="4.5" fill="none"/><path d="M427.8 172.8 l6.4 6.4"/></g><text x="442" y="180.5" font-size="13" font-weight="400" fill="#86868b" text-anchor="start">bima</text><rect x="414" y="192" width="280" height="1" fill="#000" opacity=".1"/><rect x="409" y="198" width="290" height="22" rx="5" fill="#5865F2"/><text x="426" y="213.5" font-size="13" font-weight="400" fill="#fff" text-anchor="start">Mute</text><text x="690" y="213.5" font-size="13" font-weight="400" fill="#fff" text-anchor="end">⌃⌥M</text><text x="426" y="235.5" font-size="13" font-weight="400" fill="#1d1d1f" text-anchor="start">Deafen</text><text x="690" y="235.5" font-size="13" font-weight="400" fill="#86868b" text-anchor="end">⌃⌥D</text><text x="426" y="257.5" font-size="13" font-weight="400" fill="#1d1d1f" text-anchor="start">Disconnect</text><rect x="414" y="269" width="280" height="1" fill="#000" opacity=".1"/><text x="426" y="290.5" font-size="13" font-weight="400" fill="#1d1d1f" text-anchor="start">Join Voice Channel</text><path d="M686 282 l4 4 l-4 4" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="414" y="302" width="280" height="1" fill="#000" opacity=".1"/><text x="426" y="323.5" font-size="13" font-weight="400" fill="#1d1d1f" text-anchor="start">Settings</text><path d="M686 315 l4 4 l-4 4" fill="none" stroke="#1d1d1f" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><rect x="414" y="335" width="280" height="1" fill="#000" opacity=".1"/><text x="426" y="356.5" font-size="13" font-weight="400" fill="#1d1d1f" text-anchor="start">Quit Discord Voice Lite</text><text x="690" y="356.5" font-size="13" font-weight="400" fill="#86868b" text-anchor="end">⌘Q</text>
+  </g>
+</svg>
