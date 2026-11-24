@@ -401,7 +401,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let ready = status == "ready"
         menu.addItem(action("Mute", #selector(toggleMute), key: "m", on: muted, enabled: ready))
         menu.addItem(action("Deafen", #selector(toggleDeafen), key: "d", on: deafened, enabled: ready))
-        menu.addItem(action("Disconnect", #selector(leave), enabled: connected))
+        // Tetap aktif saat auto-reconnect, supaya user bisa menghentikannya.
+        menu.addItem(action("Disconnect", #selector(leave), enabled: connected || (voice["connecting"] as? Bool ?? false)))
         menu.addItem(.separator())
 
         let joinItem = NSMenuItem(title: "Join Voice Channel", action: nil, keyEquivalent: "")

@@ -42,6 +42,25 @@ REORDER_DEPTH = 3  # paket (60 ms) yang ditunggu sebelum paket di celah dianggap
 MAX_CONCEAL = 6  # celah lebih panjang dari ini tidak di-PLC (hasilnya cuma dengung)
 EXPECTED_LOSS = 0.15  # supaya encoder benar-benar menyisipkan FEC in-band
 
+# Pemulihan koneksi voice (lihat Daemon._watchdog_loop).
+WATCHDOG_INTERVAL = 2.0  # detik
+RECOVER_GRACE = 12.0  # beri waktu library reconnect sendiri sebelum kita join ulang
+REJOIN_MAX_ATTEMPTS = 6  # percobaan gagal (saat gateway hidup) sebelum menyerah
+GATEWAY_BACKOFF_MAX_EXP = 5  # backoff reconnect gateway maks ~2^5 = 32 detik (default library ~17 menit)
+
+
+class _CappedBackoff(discord.backoff.ExponentialBackoff):
+    """Backoff reconnect gateway dengan batas atas kecil. Default discord.py bisa menunggu
+    hingga ~17 menit setelah beberapa kali gagal (mis. Wi-Fi putus), sehingga app terlihat
+    mati lama sekali setelah jaringan sudah kembali."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._max = GATEWAY_BACKOFF_MAX_EXP
+
+
+discord.client.ExponentialBackoff = _CappedBackoff  # type: ignore[misc]
+
 # Frame di audio socket: [u8 type][u32 BE len][payload]
 FRAME_PLAYBACK = 1  # daemon → UI: u32 BE ssrc + PCM s16le stereo 48 kHz
 FRAME_MIC = 2  # UI → daemon: PCM s16le mono 48 kHz, 960 sample
@@ -261,8 +280,18 @@ class Daemon:
         self._channels_dirty = asyncio.Event()
         self._last_voice_payload: str | None = None
         self._lock = asyncio.Lock()
+        # Channel yang user inginkan; None = user memang tidak di voice. Selama ini tidak None,
+        # watchdog akan memulihkan koneksi yang putus.
+        self.want_channel: int | None = None
+        self._gateway_up = False
+        self._down_since: float | None = None
+        self._next_rejoin = 0.0
+        self._rejoin_attempts = 0
 
         self.client.event(self.on_ready)
+        self.client.event(self.on_connect)
+        self.client.event(self.on_resumed)
+        self.client.event(self.on_disconnect)
         self.client.event(self.on_voice_state_update)
 
     # ---------- output ----------
@@ -279,12 +308,28 @@ class Daemon:
         self.emit('status', state='ready', user=str(user), user_id=str(user.id))
         self._channels_dirty.set()
 
+    async def on_connect(self) -> None:
+        self._gateway_up = True
+
+    async def on_resumed(self) -> None:
+        self._gateway_up = True
+        log.info('gateway resumed')
+
+    async def on_disconnect(self) -> None:
+        if self._gateway_up:
+            log.warning('gateway terputus')
+        self._gateway_up = False
+
     async def on_voice_state_update(self, member: discord.Member, before: Any, after: Any) -> None:
         self._channels_dirty.set()
-        if member.id == self.client.user.id and after.channel is None and self.voice is not None:
-            # Di-disconnect dari luar (kick, channel dihapus, dsb).
-            await self._teardown_audio()
-            self.voice = None
+        if member.id == self.client.user.id:
+            if after.channel is not None and self.want_channel is not None:
+                # Dipindah orang lain → ikuti channel barunya.
+                self.want_channel = after.channel.id
+            elif after.channel is None and self.want_channel is not None:
+                # Bisa kick, tapi juga bisa bagian dari reconnect internal library (ia mengirim
+                # channel=None lalu join lagi). Jangan teardown di sini; watchdog yang memutuskan.
+                log.info('voice state: channel kosong; menunggu reconnect')
         self._emit_voice(force=True)
 
     # ---------- snapshots ----------
@@ -323,8 +368,10 @@ class Daemon:
 
     def _emit_voice(self, force: bool = False) -> None:
         voice = self.voice
+        connected = bool(voice and voice.is_connected())
         payload: dict[str, Any] = {
-            'connected': bool(voice and voice.is_connected()),
+            'connected': connected,
+            'connecting': not connected and self.want_channel is not None,
             'muted': self.muted or self.deafened,
             'deafened': self.deafened,
         }
@@ -355,8 +402,75 @@ class Daemon:
         # Polling ringan untuk indikator speaking; hanya emit kalau ada perubahan.
         while True:
             await asyncio.sleep(0.25)
-            if self.voice is not None:
+            if self.voice is not None or self.want_channel is not None:
                 self._emit_voice()
+
+    async def _watchdog_loop(self) -> None:
+        while True:
+            await asyncio.sleep(WATCHDOG_INTERVAL)
+            try:
+                await self._watchdog_tick()
+            except Exception:
+                log.exception('watchdog error')
+
+    async def _watchdog_tick(self) -> None:
+        """Pulihkan voice yang putus tanpa user menekan Disconnect.
+
+        discord.py mencoba reconnect sendiri (resume / connect ulang). Kalau berhasil, player &
+        sink di-restart supaya audio jalan lagi. Kalau setelah RECOVER_GRACE masih putus (resume
+        timeout, sesi gateway baru setelah IDENTIFY ulang, kick, dsb.), kita join ulang sendiri.
+        """
+        want = self.want_channel
+        if want is None or self._lock.locked():
+            self._down_since = None
+            return
+        voice = self.voice
+        now = time.monotonic()
+        if voice is not None and voice.is_connected():
+            if self._down_since is not None:
+                log.info('voice pulih sendiri setelah %.1fs; restart audio', now - self._down_since)
+                self._down_since = None
+                self._rejoin_attempts = 0
+                async with self._lock:
+                    await self._restart_audio()
+                self._emit_voice(force=True)
+            return
+
+        if self._down_since is None:
+            log.warning('voice terputus; menunggu reconnect library')
+            self._down_since = now
+            self._emit_voice(force=True)
+            return
+        if now - self._down_since < RECOVER_GRACE or now < self._next_rejoin or not self._gateway_up:
+            return
+
+        self._rejoin_attempts += 1
+        log.warning('join ulang otomatis (percobaan %d)', self._rejoin_attempts)
+        if await self._rejoin(want):
+            log.info('join ulang berhasil')
+            self._down_since = None
+            self._rejoin_attempts = 0
+        elif self._rejoin_attempts >= REJOIN_MAX_ATTEMPTS or self.client.get_channel(want) is None:
+            log.warning('menyerah join ulang')
+            async with self._lock:
+                self.want_channel = None
+                await self._drop_voice()
+            self._down_since = None
+            self._rejoin_attempts = 0
+            self.emit('error', message='Koneksi voice terputus dan gagal tersambung ulang')
+            self._emit_voice(force=True)
+        else:
+            self._next_rejoin = now + min(60.0, 5.0 * 2 ** (self._rejoin_attempts - 1))
+
+    async def _rejoin(self, channel_id: int) -> bool:
+        channel = self.client.get_channel(channel_id)
+        if not isinstance(channel, (discord.VoiceChannel, discord.StageChannel)):
+            return False
+        async with self._lock:
+            if self.want_channel != channel_id:
+                return True  # user sudah memilih hal lain sementara itu
+            await self._connect_channel(channel, report_error=False)
+            return self.voice is not None and self.voice.is_connected()
 
     # ---------- audio ----------
 
@@ -397,6 +511,18 @@ class Daemon:
 
         self._emit_audio(want_mic, want_speaker)
 
+    async def _restart_audio(self) -> None:
+        # Setelah library reconnect, player & sink lama belum tentu masih hidup → buat ulang.
+        # Tidak lewat _teardown_audio supaya AVAudioEngine di UI tidak ikut dimatikan.
+        voice = self.voice
+        if voice is not None:
+            if voice.is_listening():
+                voice.stop_listening()
+            voice.stop()
+        self.receiver = None
+        self.mic = None
+        await self._apply_audio()
+
     async def _teardown_audio(self) -> None:
         voice = self.voice
         if voice is not None:
@@ -428,34 +554,66 @@ class Daemon:
             self.emit('error', message='Channel tidak ditemukan')
             return
         async with self._lock:
+            self.want_channel = channel.id
+            self._down_since = None
+            self._rejoin_attempts = 0
             if self.voice is not None and self.voice.is_connected():
                 if self.voice.channel and self.voice.channel.guild == channel.guild:
                     await self.voice.move_to(channel)
                     self._emit_voice(force=True)
                     return
-                await self._teardown_audio()
-                await self.voice.disconnect()
-                self.voice = None
-            self.emit('voice', connected=False, connecting=True, muted=self.muted or self.deafened, deafened=self.deafened)
-            try:
-                self.voice = await channel.connect(
-                    cls=VoiceClient, self_mute=self.muted or self.deafened, self_deaf=self.deafened
-                )
-            except Exception as e:
-                log.exception('join failed')
-                self.voice = None
-                self.emit('error', message=f'Gagal join: {e}')
+            if not await self._connect_channel(channel, report_error=True):
+                self.want_channel = None
                 self._emit_voice(force=True)
-                return
-            await self._apply_audio()
+
+    async def _connect_channel(self, channel: discord.VoiceChannel | discord.StageChannel, *, report_error: bool) -> bool:
+        """Join channel dari nol (harus dipanggil dengan self._lock dipegang)."""
+        await self._drop_voice()
+        self.emit('voice', connected=False, connecting=True, muted=self.muted or self.deafened, deafened=self.deafened)
+        try:
+            self.voice = await channel.connect(
+                cls=VoiceClient, self_mute=self.muted or self.deafened, self_deaf=self.deafened
+            )
+        except Exception as e:
+            log.exception('join failed')
+            self.voice = None
+            # Bersihkan voice client setengah jadi supaya percobaan berikutnya tidak kena
+            # "Already connected to a voice channel".
+            await self._drop_voice()
+            if report_error:
+                self.emit('error', message=f'Gagal join: {e}')
             self._emit_voice(force=True)
+            return False
+        await self._apply_audio()
+        self._emit_voice(force=True)
+        return True
+
+    async def _drop_voice(self) -> None:
+        """Putuskan semua voice client, termasuk yang masih nyangkut di loop reconnect library."""
+        await self._teardown_audio()
+        clients = list(self.client.voice_clients)
+        if self.voice is not None and self.voice not in clients:
+            clients.append(self.voice)
+        for vc in clients:
+            # disconnect() tidak membatalkan poller websocket; poller yang sedang di loop
+            # reconnect bisa join lagi memakai client lama dan bentrok dengan join baru.
+            conn = getattr(vc, '_connection', None)
+            runner = getattr(conn, '_runner', None)
+            if runner is not None:
+                runner.cancel()
+                conn._runner = None
+            try:
+                await vc.disconnect(force=True)
+            except Exception:
+                log.warning('gagal disconnect voice client lama', exc_info=True)
+        self.voice = None
 
     async def cmd_leave(self) -> None:
         async with self._lock:
+            self.want_channel = None
+            self._down_since = None
             if self.voice is not None:
-                await self._teardown_audio()
-                await self.voice.disconnect()
-                self.voice = None
+                await self._drop_voice()
             self._emit_voice(force=True)
 
     async def _set_flags(self, muted: bool, deafened: bool) -> None:
@@ -498,6 +656,7 @@ class Daemon:
         await self.loop.connect_read_pipe(lambda: asyncio.StreamReaderProtocol(reader), sys.stdin)
         asyncio.create_task(self._channels_loop())
         asyncio.create_task(self._voice_loop())
+        asyncio.create_task(self._watchdog_loop())
         self.emit('status', state='need_token')
         while line := await reader.readline():
             try:
@@ -517,6 +676,8 @@ class Daemon:
 async def main() -> None:
     logging.basicConfig(level=logging.INFO, stream=sys.stderr, format='%(asctime)s %(levelname)s %(name)s: %(message)s')
     logging.getLogger('discord').setLevel(logging.WARNING)
+    # Alur reconnect voice dicatat di INFO; perlu untuk diagnosa putus-sambung.
+    logging.getLogger('discord.voice_state').setLevel(logging.INFO)
     load_opus()
     if len(sys.argv) < 2:
         sys.exit('usage: discordlight.py <audio-socket-path>')
